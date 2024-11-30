@@ -15,9 +15,15 @@ Window Function Convolution: Blake et al. 2018: https://ui.adsabs.harvard.edu/ab
 
 
 The following Python packages need to be installed:
+
 1: numpy
+
 2: scipy
+
 3: camb (optional, used to calculate the mater power spectrum)
+
 4: pypower (optional, only for window function convolution of Beuteler method)
+
 5: ChainConsumer (optional, only for making plots)
+
 6: emcee  (optional, only for the fit of growth rate)
