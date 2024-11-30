@@ -13,4 +13,11 @@ Paper 3: Qin et al. 2024: https://arxiv.org/abs/2411.09571
 
 Window Function Convolution: Blake et al. 2018: https://ui.adsabs.harvard.edu/abs/2018MNRAS.479.5168B/abstract
 
-SDSSv data: Howlett et al. 2022: https://ui.adsabs.harvard.edu/abs/2022MNRAS.515..953H/abstract
+
+The following Python packages need to be installed:
+1: numpy
+2: scipy
+3: camb (optional, used to calculate the mater power spectrum)
+4: pypower (optional, only for window function convolution of Beuteler method)
+5: ChainConsumer (optional, only for making plots)
+6: emcee  (optional, only for the fit of growth rate)
