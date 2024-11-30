@@ -1,5 +1,5 @@
 # Galaxy_Power_Spectrum
-Constrain the growth rate of the cosmic Large-Scale-Structure using Galaxy Power Spectrum.
+Constrain the growth rate of the cosmic Large-Scale-Structure using auto- cross- Galaxy density & momentum Power Spectrum.
 
 The code used to measure the density and momentum auto- and cross- power spectrum multipoles of galaxy and velocity surveys.  
 
