@@ -23,7 +23,7 @@ MathModelPS: the code to dirive the expressions of the models of power spectrum.
 
 
 
-The following Python packages need to be installed:
+The following Python packages need to be installed if you want use CosmPSPy to measure power spectrum:
 
 1: numpy
 
@@ -36,3 +36,9 @@ The following Python packages need to be installed:
 5: ChainConsumer (optional, only for making plots)
 
 6: emcee  (optional, only for the fit of growth rate)
+
+The following Fortran packages need to be installed if you want use CosmPSFt to measure power spectrum:
+1: GSL
+2: FFTW3
+
+
