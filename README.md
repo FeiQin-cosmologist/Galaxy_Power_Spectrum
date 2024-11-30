@@ -1,7 +1,7 @@
 # Galaxy_Power_Spectrum
 Constrain the growth rate of the cosmic Large-Scale-Structure using auto- & cross- Power Spectrum of Galaxy density & momentum field. This is the final definitive edition.
 
-The code used to measure the density and momentum auto- and cross- power spectrum multipoles of galaxy and velocity surveys.  
+The code used to measure and model and fit the density and momentum auto- and cross- power spectrum multipoles of galaxy and velocity surveys.  
 
 Users will need to cite our papers:
 
