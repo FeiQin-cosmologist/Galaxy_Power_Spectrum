@@ -1,5 +1,5 @@
 # Galaxy_Power_Spectrum
-Constrain the growth rate of the cosmic Large-Scale-Structure using auto- & cross- Power Spectrum of Galaxy density & momentum field.
+Constrain the growth rate of the cosmic Large-Scale-Structure using auto- & cross- Power Spectrum of Galaxy density & momentum field. This is the final definitive edition.
 
 The code used to measure the density and momentum auto- and cross- power spectrum multipoles of galaxy and velocity surveys.  
 
@@ -29,18 +29,25 @@ The following Python packages need to be installed if you want to use CosmPSPy t
 
 2: scipy
 
-3: camb (optional, used to calculate the mater power spectrum)
-
-4: pypower (optional, only for window function convolution of Beuteler method)
-
-5: ChainConsumer (optional, only for making plots)
-
-6: emcee  (optional, only for the fit of growth rate)
 
 The following Fortran packages need to be installed if you want to use CosmPSFt to measure power spectrum:
 
-1: GSL
+1: GSL : https://macappstore.org/gsl/ 
 
-2: FFTW3
+2: FFTW3 : https://www.fftw.org/install/mac.html
+
+
+The following Python packages need to be installed if you want to calculate model power spectrum:
+
+1: camb (used to calculate the mater power spectrum) : https://pypi.org/project/camb/
+
+2: pypower (optional, only for window function convolution of Beuteler method) : https://github.com/cosmodesi/pypower
+
+
+The following Python packages need to be installed if you want to fit growth rate:
+
+1: ChainConsumer : https://samreay.github.io/ChainConsumer/
+
+2: emcee 
 
 
