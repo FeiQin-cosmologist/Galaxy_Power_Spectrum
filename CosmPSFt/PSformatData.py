@@ -1,17 +1,84 @@
 import numpy as np
-import math
+import scipy as sp
+from scipy import integrate
+from scipy.interpolate import splev, splrep
+
 
 LightSpeed=299792.458
+ 
+# Calculates H(z)/H0
+def Ez(redshift, omega_m, omega_lambda, omega_rad, w0, wa, ap):
+    fz = ((1.0+redshift)**(3*(1.0+w0+wa*ap)))*np.exp(-3*wa*(redshift/(1.0+redshift)))
+    omega_k = 1.0-omega_m-omega_lambda-omega_rad
+    return np.sqrt(omega_rad*(1.0+redshift)**4+omega_m*(1.0+redshift)**3+omega_k*(1.0+redshift)**2+omega_lambda*fz)
+# The Comoving Distance Integrand
+def DistDcIntegrand(redshift, omega_m, omega_lambda, omega_rad, w0, wa, ap):
+    return 1.0/Ez(redshift, omega_m, omega_lambda, omega_rad, w0, wa, ap)
+# The Comoving Distance in Mpc
+def DistDc(redshift, omega_m, omega_lambda, omega_rad, Hubble_Constant, w0, wa, ap):
+    return (LightSpeed/Hubble_Constant)*integrate.quad(DistDcIntegrand, 0.0, redshift, args=(omega_m, omega_lambda, omega_rad, w0, wa, ap))[0]
+def spline_Rsf2Dis(OmegaM,OmegaA,Hub,nbin=10000,redmax=2.5):
+    dist = np.empty(nbin);red = np.empty(nbin)
+    for j in range(nbin):
+        red[j] = j*redmax/nbin
+        dist[j] = DistDc(red[j],OmegaM,OmegaA, 0.0,Hub,-1.0, 0.0, 0.0)
+    dist_spline = sp.interpolate.splrep(red, dist, s=0)
+    return dist_spline
+def DisRsfConvert(xdt,OmegaM,OmegaA,Hub,nbin=10000,redmax=2.5):
+    spl_fun=spline_Rsf2Dis(OmegaM,OmegaA,Hub,nbin,redmax)
+    Distc        = splev(xdt, spl_fun)
+    return Distc
+def Sky2Cat(ra,dec,rsft,OmegaM , OmegaA ,Hub,nbin=3000,redmax=2.5):
+    disz= DisRsfConvert(rsft,OmegaM,OmegaA,Hub,nbin,redmax)
+    X = disz*np.cos(dec/180.*np.pi)*np.cos(ra/180.*np.pi)
+    Y = disz*np.cos(dec/180.*np.pi)*np.sin(ra/180.*np.pi)
+    Z = disz*np.sin(dec/180.*np.pi)    
+    return X,Y,Z 
+def nbar_Fun(ra,dec,rsf,nx,ny,nz,OmegaM,OmegaA,Hub):
+    rsfmax    = np.max(rsf)
+    distmax   = DisRsfConvert(rsfmax,OmegaM,OmegaA,Hub) 
+    lx,ly,lz  = 2.*distmax,2.*distmax,2.*distmax
+    x0,y0,z0  = distmax,distmax,distmax
+    dx,dy,dz  = lx/nx,ly/ny,lz/nz
+    dvol      = dx*dy*dz
+    xlims     = np.linspace(0.,lx,nx+1) - x0
+    ylims     = np.linspace(0.,ly,ny+1) - y0
+    zlims     = np.linspace(0.,lz,nz+1) - z0
+    # Convert to (x,y,z) positions
+    x,y,z     = Sky2Cat(ra,dec,rsf ,OmegaM , OmegaA ,Hub)
+    # Create number density catalogue
+    Num,edges = np.histogramdd(np.vstack([x+x0,y+y0,z+z0]).transpose(),bins=(nx,ny,nz),range=((0.,lx),(0.,ly),(0.,lz)))
+    ndat      = len(ra)*1.
+    ndensgrid = (ndat/dvol)*(Num/np.sum(Num))
+    # Sample number density at random positions
+    ix        = np.digitize(x,xlims) - 1
+    iy        = np.digitize(y,ylims) - 1
+    iz        = np.digitize(z,zlims) - 1
+    nb        = ndensgrid[ix,iy,iz]
+    return nb,ndensgrid,xlims,ylims,zlims 
+def nbarAsign_Fun(ra,dec,rsf,nbRgrid,xlims,ylims,zlims,OmegaM,OmegaA,Hub):
+    x,y,z     = Sky2Cat(ra,dec,rsf ,OmegaM , OmegaA ,Hub)
+    ix        = np.digitize(x,xlims) - 1
+    iy        = np.digitize(y,ylims) - 1
+    iz        = np.digitize(z,zlims) - 1
+    nb        = nbRgrid[ix,iy,iz]
+    return nb 
+
+
+
+
+
+
 
 def Vp_to_logd(vpec,Rsf,OmegaM):
     deccel = 3.0*OmegaM/2.0 - 1.0
     Vmod   = Rsf*LightSpeed*(1.0 + 0.5*(1.0 - deccel)*Rsf - (2.0 - deccel - 3.0*deccel*deccel)*Rsf*Rsf/6.0)
-    Logd   =    vpec / ( math.log(10.)*Vmod/(1.0+Vmod/LightSpeed)  )
+    Logd   =    vpec / ( np.log(10.)*Vmod/(1.0+Vmod/LightSpeed)  )
     return Logd
 def logd_to_Vp(Logd,Rsf,OmegaM):
     deccel = 3.0*OmegaM/2.0 - 1.0
     Vmod   = Rsf*LightSpeed*(1.0 + 0.5*(1.0 - deccel)*Rsf - (2.0 - deccel - 3.0*deccel*deccel)*Rsf*Rsf/6.0)
-    vpec   = math.log(10.)*Vmod/(1.0+Vmod/LightSpeed) * Logd
+    vpec   = np.log(10.)*Vmod/(1.0+Vmod/LightSpeed) * Logd
     return vpec
 def VpRand_Fun(logd,cz,czR,NczBin,OmegaM):
     pv=logd_to_Vp(logd,cz/LightSpeed,OmegaM)
@@ -29,6 +96,7 @@ def VpRand_Fun(logd,cz,czR,NczBin,OmegaM):
     np.random.seed(326)
     pvR=np.random.normal(loc=0.0, scale=epvR, size=len(epvR))
     return pvR, epvR
+
 
     
 
