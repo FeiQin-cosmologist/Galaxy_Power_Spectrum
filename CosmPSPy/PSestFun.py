@@ -73,6 +73,35 @@ def VpRand_Fun(logd,cz,czR,NczBin,OmegaM):
     np.random.seed(326)
     pvR=np.random.normal(loc=0.0, scale=epvR, size=len(epvR))
     return pvR, epvR
+def nbar_Fun(ra,dec,rsf,nx,ny,nz,OmegaM,OmegaA,Hub):
+    rsfmax    = np.max(rsf)
+    distmax   = DisRsfConvert(rsfmax,OmegaM,OmegaA,Hub) 
+    lx,ly,lz  = 2.*distmax,2.*distmax,2.*distmax
+    x0,y0,z0  = distmax,distmax,distmax
+    dx,dy,dz  = lx/nx,ly/ny,lz/nz
+    dvol      = dx*dy*dz
+    xlims     = np.linspace(0.,lx,nx+1) - x0
+    ylims     = np.linspace(0.,ly,ny+1) - y0
+    zlims     = np.linspace(0.,lz,nz+1) - z0
+    # Convert to (x,y,z) positions
+    x,y,z     = Sky2Cat(ra,dec,rsf ,OmegaM , OmegaA ,Hub)
+    # Create number density catalogue
+    Num,edges = np.histogramdd(np.vstack([x+x0,y+y0,z+z0]).transpose(),bins=(nx,ny,nz),range=((0.,lx),(0.,ly),(0.,lz)))
+    ndat      = len(ra)*1.
+    ndensgrid = (ndat/dvol)*(Num/np.sum(Num))
+    # Sample number density at random positions
+    ix        = np.digitize(x,xlims) - 1
+    iy        = np.digitize(y,ylims) - 1
+    iz        = np.digitize(z,zlims) - 1
+    nb        = ndensgrid[ix,iy,iz]
+    return nb,ndensgrid,xlims,ylims,zlims 
+def nbarAsign_Fun(ra,dec,rsf,nbRgrid,xlims,ylims,zlims,OmegaM,OmegaA,Hub):
+    x,y,z     = Sky2Cat(ra,dec,rsf ,OmegaM , OmegaA ,Hub)
+    ix        = np.digitize(x,xlims) - 1
+    iy        = np.digitize(y,ylims) - 1
+    iz        = np.digitize(z,zlims) - 1
+    nb        = nbRgrid[ix,iy,iz]
+    return nb 
 #########################     The end of Sec 1.    ############################ 
 ###############################################################################  
 
