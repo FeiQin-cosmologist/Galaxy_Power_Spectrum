@@ -275,7 +275,7 @@ def PSloop_Fun( KmodLim,hub,ombh2,omch2,ns, As,out_dir ):
     pars.set_matter_power(redshifts=[0.0], kmax=100.0)
     pars.NonLinear = model.NonLinear_none
     results = camb.get_results(pars)
-    kh, z, pk = results.get_matter_power_spectrum(minkh=1e-4, maxkh=100.0, npoints = 692)
+    kh, z, pk = results.get_matter_power_spectrum(minkh=1e-4, maxkh=100.0, npoints = 568)
     pk=pk[0]; ks=kh[kh<=KmodLim]
     print( 'sigma8_fid_integ = ',results.get_sigma8(),'\n')
     Pl_spline = sp.interpolate.splrep(np.log10(kh),np.log10(pk ), s=0)
@@ -363,7 +363,7 @@ def PijFun(parm,PT,MU,pstyp):
             P01=f*b1*sigma8rat*(Pl+2.*sigma8rat*(I01+b1*I10+3.*k*k*Pl*(J01+b1*J10))-b2*sigma8rat*K11-bs*sigma8rat*Ks11)-f*sigma8rat**2*(b2*K10+bs*Ks10+b3nl*sig3_squre*Pl)
             P02=f*f*b1*sigma8rat**2*(I02+mu**2*I20+2.*k*k*Pl*(J02+mu**2*J20))-f*f*k*k*sigv1_squre*P00+f*f*sigma8rat**2*(b2*(K20+mu**2*K30)+bs*(Ks20+mu**2*Ks30))
             P03=-f*f*k*k*sigv2_squre*P01
-            P04=-1./2.*f*f*f*f*b1*k*k*sigv3_squre*sigma8rat**2*(I02+mu**2*I20+2.*k*k*Pl*(J02+mu**2*J20)) +1./4.*f*f*f*f*b1*b1*k**4*P00*(sigv3_squre**2+sig4_squre)#/3. )
+            P04=-1./2.*f*f*f*f*b1*k*k*sigv3_squre*sigma8rat**2*(I02+mu**2*I20+2.*k*k*Pl*(J02+mu**2*J20)) +1./4.*f*f*f*f*b1*b1*k**4*P00*(sigv3_squre**2+sig4_squre) 
             P11=f*f*sigma8rat*(mu**2*(Pl+sigma8rat*(2.*I11+(b1+b1+b1+b1)*I22+b1*b1*I13+6.*k**2*Pl*(J11+(b1+b1)*J10)))  +b1*b1*sigma8rat*I31)
             P12=f*f*f*sigma8rat**2*(I12+mu**2*I21-b1*(I03+mu**2*I30)+2.*k**2*Pl*(J02+mu**2*J20))   -f*f*k*k*sigv1_squre* P01+2.*f*f*f*k*k*sigma8rat**2*(I01+I10+3.*k*k*Pl*(J01+J10))   *sigv1_squre 
             P13=-f*f*k*k*f*f*sigma8rat*(sigv2_squre*mu**2*(Pl+sigma8rat*(2.*I11+(b1+b1+b1+b1)*I22 +6.*k*k*Pl*(J11+(b1+b1)*J10))) +sigv1_squre*b1*b1*sigma8rat*(mu**2*I13+I31) )
@@ -374,7 +374,7 @@ def PijFun(parm,PT,MU,pstyp):
             P11=f*f*sigma8rat*(Pl*mu*mu+sigma8rat*(b1*b1v*I31+(2.*I11+b1*b1v*I13+2.*b1*I22+2.*b1v*I22+6.*((b1+b1v)*J10+J11)*k*k*Pl)*mu*mu))
             P02=f*f*b1*sigma8rat**2*(I02+mu**2*I20+2.*k*k*Pl*(J02+mu**2*J20))-f*f*k*k*sigvv1_squre*P00+f*f*sigma8rat**2*(b2*(K20+mu**2*K30)+bs*(Ks20+mu**2*Ks30))
             P03=-f*f*k*k*sigvv2_squre*P01
-            P04=-1./2.*f*f*f*f*b1*k*k*sigvv3_squre*sigma8rat**2*(I02+mu**2*I20+2.*k*k*Pl*(J02+mu**2*J20)) +1./4.*f*f*f*f*b1*b1v*k**4*P00*(sigvv3_squre**2+sig4_squre)#/3. )
+            P04=-1./2.*f*f*f*f*b1*k*k*sigvv3_squre*sigma8rat**2*(I02+mu**2*I20+2.*k*k*Pl*(J02+mu**2*J20)) +1./4.*f*f*f*f*b1*b1v*k**4*P00*(sigvv3_squre**2+sig4_squre) 
             P12=f*f*f*sigma8rat**2*(I12+mu**2*I21-b1*(I03+mu**2*I30)+2.*k**2*Pl*(J02+mu**2*J20))   -f*f*k*k*sigvv1_squre* P01+2.*f*f*f*k*k*sigma8rat**2*(I01+I10+3.*k*k*Pl*(J01+J10))   *sigvv1_squre 
             P13=-f*f*k*k*f*f*sigma8rat*(sigvv2_squre*mu**2*(Pl+sigma8rat*(2.*I11+(b1+b1+b1+b1)*I22 +6.*k*k*Pl*(J11+(b1+b1)*J10))) +sigvv1_squre*b1*b1*sigma8rat*(mu**2*I13+I31) )
             P22=1./4.*f*f*f*f*sigma8rat**2*(I23+2.*mu**2*I32+mu**4*I33)+f*f*f*f*k**4*sigvv1_squre**2 *P00-f*f*k*k*sigvv1_squre*(2.*P02-f*f*sigma8rat**2*(b2*(K20+mu**2*K30)+bs*(Ks20+mu**2*Ks30)))          
@@ -911,13 +911,12 @@ def PS_extender(k,Pk,k_start,k_end):
     return k,Pk
 
 def ConvMat_Ross(Ki,kjmin,kjmax,nkbinc,WF_rand,Ncosa,epsilon_par):  
-    #kjmin=min(Ki);kjmax=max(Ki)
     Kj=np.linspace(kjmin,kjmax,nkbinc+1)
     
     dcosa=2.0/ Ncosa   
-    Nki=len(Ki)  ;  #ki_min=min(Ki)  ;  ki_max=max(Ki)      
+    Nki=len(Ki)  ;       
     Nkj=len(Kj)  ;  kj_min=min(Kj)  ;  kj_max=max(Kj)   
-    WF_kikj=np.zeros((Nki,Nkj))  #WF_kikj[KI,KJ]
+    WF_kikj=np.zeros((Nki,Nkj))   
     
     WF_rand[0][0]=0.0  ;  WF_rand[1][0]=1.0
     Pwin_spline = sp.interpolate.splrep(WF_rand[0],WF_rand[1], s=0) 
@@ -935,7 +934,7 @@ def ConvMat_Ross(Ki,kjmin,kjmax,nkbinc,WF_rand,Ncosa,epsilon_par):
     Pwin = sp.interpolate.splev(eps, Pwin_spline, der=0)
     
     for i in range(Nki):
-       FUN=np.zeros(  (Nkj,Neps+1,Ncosa+1)  )# FUN[Nkj,Neps+1,Ncosa+1]
+       FUN=np.zeros(  (Nkj,Neps+1,Ncosa+1)  ) 
        for i_eps in range(Neps+1):  
           for i_cosa in range(Ncosa+1):
              if (np.abs(Ki[i]**2+eps[i_eps]**2-2.0*Ki[i]*eps[i_eps]*cosa[i_cosa])<10.e-15) and (cosa[i_cosa]==1.0):
@@ -953,10 +952,6 @@ def ConvMat_Ross(Ki,kjmin,kjmax,nkbinc,WF_rand,Ncosa,epsilon_par):
           F4=sum(FUN[j,0,:])    
           F5=sum(FUN[j,Neps,:]) 
           F6=sum(sum(FUN[j,1:Neps,1:Ncosa]))
-          #F6=0.
-          #for i_eps in range(Neps-1): 
-          #   for i_cosa in range(Ncosa-1):
-          #      F6=F6+FUN[j,i_eps+1,i_cosa+1]
           WF_kikj[i,j]=deps*dcosa*(0.25*F1+0.5*(F2+F3+F4+F5)+F6)           
     
     # normalization WF_kikj[i,j]:
