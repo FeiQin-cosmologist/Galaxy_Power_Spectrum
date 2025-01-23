@@ -959,6 +959,84 @@ ENDIF
 
 
 
+!! This is the shortnoise multipole for Density PS: 
+!!real(8):: Lfct
+!!real(8),allocatable,dimension(:)::Pg0shot,Pg1shot,Pg2shot,Pg3shot,Pg4shot
+!print*,'This is the shortnoise multipole for Density PS:'
+!allocate(Pg0shot(nkw));allocate(Pg1shot(nkw));allocate(Pg2shot(nkw));
+!allocate(Pg3shot(nkw));allocate(Pg4shot(nkw));
+!Pg0shot=0.
+!Pg1shot=0.
+!Pg2shot=0.
+!Pg3shot=0.
+!Pg4shot=0.
+!IF((PS_Multi=='YES').or.(PS_Multi=='ALL'))then
+!Do j=1,nx
+!   if(j<=Nx/2)then
+!      fx = (j-1)/(Nx*dx)
+!   else
+!      fx = (j-1-Nx)/(Nx*dx)
+!   endif
+!   Do k=1,ny
+!      if(k<=Ny/2)then
+!         fy = (k-1)/(Ny*dy)
+!      else
+!         fy = (k-1-Ny)/(Ny*dy)
+!      endif
+!      Do i=1,nz/2
+!         fz = (i-1)/(Nz*dz)
+!         kw=2.*pi*sqrt(fx*fx+fy*fy+fz*fz)
+!         Kvect=(/ 2.*pi*fz , 2.*pi*fx, 2.*pi*fy /)
+!         ikw=(kw-kmin)/dk
+!         IF( (ikw>=0).and.(ikw<nkw).and.(kw<(0.5*min_nqu)) )then
+!            sincx=1.;sincy=1.;sincz=1.
+!            if(fx .ne. 0.) sincx = sin(fx*dx*pi)/(fx*dx*pi);
+!            if(fy .ne. 0.) sincy = sin(fy*dy*pi)/(fy*dy*pi);
+!            if(fz .ne. 0.) sincz = sin(fz*dz*pi)/(fz*dz*pi);
+!            grid_cor=1./(sincx*sincy*sincz);
+!            do ii=1,ndata
+!               if(kw>0.)then
+!                 Lfct = (Kvect(2)*x(ii)+Kvect(3)*y(ii)+Kvect(1)*z(ii)) &
+!                        / ( kw* sqrt(x(ii)**2 +y(ii)**2 + z(ii)**2)  )                 
+!                 Pg0shot(ikw+1)=Pg0shot(ikw+1) + w(ii)*w(ii)         *grid_cor*grid_cor;
+!                 Pg1shot(ikw+1)=Pg1shot(ikw+1) + w(ii)*w(ii)*Lfct    *grid_cor*grid_cor;
+!                 Pg2shot(ikw+1)=Pg2shot(ikw+1) + w(ii)*w(ii)*Lfct**2 *grid_cor*grid_cor;
+!                 Pg3shot(ikw+1)=Pg3shot(ikw+1) + w(ii)*w(ii)*Lfct**3 *grid_cor*grid_cor;
+!                 Pg4shot(ikw+1)=Pg4shot(ikw+1) + w(ii)*w(ii)*Lfct**4 *grid_cor*grid_cor;
+!               endif
+!            enddo         
+!            do ii=1,ndatar
+!               Lfct = (Kvect(2)*xr(ii)+Kvect(3)*yr(ii)+Kvect(1)*zr(ii)) &
+!                      / ( kw* sqrt(xr(ii)**2 +yr(ii)**2 + zr(ii)**2)  ) 
+!               Pg0shot(ikw+1)=Pg0shot(ikw+1) + alpha*alpha*wr(ii)*wr(ii)          *grid_cor*grid_cor;
+!               Pg1shot(ikw+1)=Pg1shot(ikw+1) + alpha*alpha*wr(ii)*wr(ii)*Lfct     *grid_cor*grid_cor;
+!               Pg2shot(ikw+1)=Pg2shot(ikw+1) + alpha*alpha*wr(ii)*wr(ii)*Lfct**2 *grid_cor*grid_cor;
+!               Pg3shot(ikw+1)=Pg3shot(ikw+1) + alpha*alpha*wr(ii)*wr(ii)*Lfct**3 *grid_cor*grid_cor;
+!               Pg4shot(ikw+1)=Pg4shot(ikw+1) + alpha*alpha*wr(ii)*wr(ii)*Lfct**4 *grid_cor*grid_cor;
+!            enddo
+!         ENDIF
+!      ENDDo
+!   ENDDo
+!ENDDo
+!ENDIF
+!do ikw=1,Nkw
+!    if( nbinkw(ikw)>0. ) then
+!        Pg0(ikw) = Pg0(ikw)/(nbinkw(ikw)*Norm);
+!        if((PS_Multi=='YES').or.(PS_Multi=='ALL'))then
+!           Pg1(ikw) = (Pg1(ikw)- (      Pg1shot(ikw)                                        )    )*3./(nbinkw(ikw)*Norm);
+!           Pg2(ikw) = (Pg2(ikw)- (1.5  *Pg2shot(ikw) - 0.5 *Pg0shot(ikw)                     )    )*5./(nbinkw(ikw)*Norm);
+!           Pg3(ikw) = (Pg3(ikw)- (2.5  *Pg3shot(ikw) - 1.5 *Pg1shot(ikw)                     )    )*7./(nbinkw(ikw)*Norm);
+!           Pg4(ikw) = (Pg4(ikw)- (4.375*Pg4shot(ikw) - 3.75*Pg2shot(ikw) + 0.375*Pg0shot(ikw)  )    )*9./(nbinkw(ikw)*Norm);
+!        endif
+!    endif
+!enddo
+!!deallocate(Pg0shot);deallocate(Pg1shot);
+!!deallocate(Pg2shot);deallocate(Pg3shot);deallocate(Pg4shot);
+
+
+
+
+
 !9.------------------------------------
 !归一化:
 do ikw=1,Nkw
