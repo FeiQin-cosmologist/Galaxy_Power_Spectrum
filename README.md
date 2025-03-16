@@ -3,7 +3,20 @@ Constrain the growth rate of the cosmic Large-Scale-Structure using auto- & cros
 
 This is the final definitive edition. 
 
-The code used to measure and model and fit the density and momentum auto- and cross- power spectrum multipoles of galaxy and velocity surveys. We have used 6dFGS and 6dfGSv mocks to test the code, we have 600 mocks for each survey. 
+This code is used to measure and model the density and momentum auto- and cross- power spectrum multipoles of galaxy and velocity surveys, as well as the window function convolution. The examples for the utilization of the this Code are shown in the following Jupyter notebook:
+
+To install the this code, the users can simply download the 'PSestFun.py' and 'PSmodFun.py' (in the CosmPSPy file) to their laptop, then importing them using:
+
+from PSestFun import *
+
+from PSmodFun import *
+
+So easy !!! The following Python packages need to be installed if you want to use CosmPSPy to measure power spectrum:
+
+1: numpy
+
+2: scipy
+
 
 \
 
@@ -27,11 +40,6 @@ MathModelPS: the code to dirive the expressions of the models of power spectrum.
 
 \
 
-The following Python packages need to be installed if you want to use CosmPSPy to measure power spectrum:
-
-1: numpy
-
-2: scipy
 
 \
 
