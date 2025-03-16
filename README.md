@@ -53,16 +53,10 @@ The following Fortran packages need to be installed if you want to use CosmPSFt 
 
 The following Python packages need to be installed if you want to calculate model power spectrum:
 
-1: camb (used to calculate the mater power spectrum) : https://pypi.org/project/camb/
+1: camb (used to calculate the linear matter power spectrum) : https://pypi.org/project/camb/
 
 2: pypower (optional, only for window function convolution of Beuteler method) : https://github.com/cosmodesi/pypower
 
-\
 
-The following Python packages need to be installed if you want to fit growth rate:
-
-1: ChainConsumer : https://samreay.github.io/ChainConsumer/
-
-2: emcee 
 
 
