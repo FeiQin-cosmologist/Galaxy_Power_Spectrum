@@ -6,7 +6,7 @@ This is the final definitive edition.
 This code is used to measure and model the density and momentum auto- and cross- power spectrum multipoles of galaxy and velocity surveys, as well as the window function convolution. The examples for the utilization of the this Code are shown in the following Jupyter notebook:
 https://github.com/FeiQin-cosmologist/Galaxy_Power_Spectrum/blob/main/CosmPSPy/Code/Examp_PS.ipynb
 
-To install the this code, the users can simply download the 'PSestFun.py' and 'PSmodFun.py' (in the CosmPSPy file) to their laptop, then importing them using:
+To install the this code, the users can simply download the 'PSestFun.py' and 'PSmodFun.py' (in the CosmPSPy file https://github.com/FeiQin-cosmologist/Galaxy_Power_Spectrum/tree/main/CosmPSPy/Code ) to their laptop, then importing them using:
 
 from PSestFun import *
 
