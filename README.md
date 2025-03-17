@@ -53,7 +53,6 @@ MathModelPS: the code to dirive the expressions of the models of power spectrum.
 \
 
 
-\
 
 The following Fortran packages need to be installed if you want to use CosmPSFt to measure power spectrum:
 
