@@ -13,7 +13,7 @@ You can download the whole file 'CosmPSPy' to your laptop to run the notebook!!!
 
 \
 
-To install the this code, the users can simply download the 'PSestFun.py' and 'PSmodFun.py' in the CosmPSPy file 
+To install this code, the users can simply download the 'PSestFun.py' and 'PSmodFun.py' in the CosmPSPy file 
 
 https://github.com/FeiQin-cosmologist/Galaxy_Power_Spectrum/tree/main/CosmPSPy/Code 
 
