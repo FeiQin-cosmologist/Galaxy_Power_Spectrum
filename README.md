@@ -1,11 +1,11 @@
 # Galaxy_Power_Spectrum
-Constrain the growth rate of the cosmic Large-Scale-Structure using auto- & cross- Power Spectrum of Galaxy density & momentum field. If you have any quesions or see any bug of the code, please contact me: qin@cppm.in2p3.fr
+This code is used to measure and model the density and momentum auto- and cross- power spectrum multipoles of galaxy and velocity surveys, as well as the window function convolution and constrain the growth rate. If you have any quesions or see any bug of the code, please contact me: qin@cppm.in2p3.fr
 
 This is the final definitive edition. 
 
 \
 
-This code is used to measure and model the density and momentum auto- and cross- power spectrum multipoles of galaxy and velocity surveys, as well as the window function convolution. The examples for the utilization of the this Code are shown in the following Jupyter notebook:
+The examples for the utilization of the this Code are shown in the following Jupyter notebook:
 
 https://github.com/FeiQin-cosmologist/Galaxy_Power_Spectrum/blob/main/CosmPSPy/Code/Examp_PS.ipynb  
 
