@@ -62,7 +62,7 @@ The following Fortran packages need to be installed if you want to use CosmPSFt 
 
 \
 
-The following Python packages need to be installed if you want to calculate model power spectrum:
+The following Python packages may need to be installed if you want to calculate model power spectrum:
 
 1: camb (optional, used to calculate the linear matter power spectrum) : https://pypi.org/project/camb/
 
