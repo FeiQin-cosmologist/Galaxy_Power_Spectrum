@@ -5,7 +5,7 @@ This is the final definitive edition.
 
 \
 
-The examples for the utilization of the this Code are shown in the following Jupyter notebook:
+The examples for the utilization of this Code are shown in the following Jupyter notebook:
 
 https://github.com/FeiQin-cosmologist/Galaxy_Power_Spectrum/blob/main/CosmPSPy/Code/Examp_PS.ipynb  
 
