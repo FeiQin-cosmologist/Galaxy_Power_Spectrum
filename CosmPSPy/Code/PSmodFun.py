@@ -264,20 +264,26 @@ def SIGMA3(kmod,Pl_spline,ks):
     return SIGMAs
 
 # 2. the parameter estimation main code:---------------------------------------
-def PSloop_Fun( KmodLim,Nkmod,hub,ombh2,omch2,ns, As,out_dir ): 
+def CAMB_Fun(kmin,kmax,nk,RsFeff,hub,ombh2,omch2,ns, As, halofit=False):
     import camb
     from camb import model 
-    #Linear spectra
     pars = camb.CAMBparams()
     pars.set_cosmology(H0=hub,ombh2=ombh2, omch2=omch2)
-    pars.set_dark_energy()  
+    pars.set_dark_energy()
     pars.InitPower.set_params(As=As,ns=ns)
-    pars.set_matter_power(redshifts=[0.0], kmax=100.0)
-    pars.NonLinear = model.NonLinear_none
-    results = camb.get_results(pars)
-    kh, z, pk = results.get_matter_power_spectrum(minkh=1e-4, maxkh=100.0, npoints = Nkmod)
-    pk=pk[0]; ks=kh[kh<=KmodLim]
-    print( 'sigma8_fid_integ = ',results.get_sigma8(),'\n')
+    pars.set_matter_power(redshifts=[RsFeff], kmax=kmax)
+    if(halofit==False):
+        pars.NonLinear = model.NonLinear_none  
+    else:
+        pars.NonLinear = camb.model.NonLinear_both #(or NonLinear_lens, NonLinear_both)
+        pars.NonLinearModel.set_params(halofit_version=halofit) # halofit = "mead2020" # https://camb.readthedocs.io/en/latest/nonlinear.html
+    results = camb.get_results(pars)    
+    kh, z, pk = results.get_matter_power_spectrum(minkh=kmin, maxkh=kmax, npoints = nk)
+    return kh, pk[0]  , results.get_sigma8()
+def PSloop_Fun( KmodLim,Nkmod,hub,ombh2,omch2,ns, As,out_dir ): 
+    kh,pk,sig8=CAMB_Fun(1e-4,100.0,Nkmod,0,hub,ombh2,omch2,ns, As, False)
+    ks=kh[kh<=KmodLim]
+    print( 'sigma8_fid_integ = ',sig8,'\n')
     Pl_spline = sp.interpolate.splrep(np.log10(kh),np.log10(pk ), s=0)
     # integrations:
     print( '\n Integration-Imn \n')
@@ -309,8 +315,8 @@ def PSloop_Fun( KmodLim,Nkmod,hub,ombh2,omch2,ns, As,out_dir ):
     PT=np.loadtxt(out_dir+'INTEG_PL.npy')
     PT=PT.T
     PT[26,0:] -= PT[38,0:];PT[27,0:] -= 4.0/9.0*PT[38,0:];PT[28,0:] -= 2.0/3.0*PT[38,0:]
-    np.save(out_dir+'INTEG_PL',np.array([PT,results.get_sigma8()],dtype=object),allow_pickle=True)    
-    return PT,results.get_sigma8(),out_dir+'INTEG_PL.npy'
+    np.save(out_dir+'INTEG_PL',np.array([PT,sig8],dtype=object),allow_pickle=True)    
+    return PT,sig8,out_dir+'INTEG_PL.npy'
 def PSloopInput_Fun( KmodLim,kh,pk,fid_sigma8,out_dir ): 
     ks=kh[kh<=KmodLim]
     Pl_spline = sp.interpolate.splrep(np.log10(kh),np.log10(pk ), s=0)
@@ -378,54 +384,53 @@ def PSloopInput_Fun( KmodLim,kh,pk,fid_sigma8,out_dir ):
 # 1. calculate Loop terms Pmn: 
 def PijFun(parm,PT,MU,pstyp):
     if(pstyp=='auto'):
-        f, b1,b2,bs,b3nl, sigv1_squre,sigv2_squre,sigv3_squre, sigma8rat = parm
+        f, b1,b2,bs,b3nl, sigv1_squre,sigv2_squre,sigv3_squre, Dz = parm
     if(pstyp=='crs'):  
-        f, b1,b2,bs,b3nl, b1v,b2v,bsv,  sigvv1_squre,sigvv2_squre,sigvv3_squre,   sigma8rat = parm  
+        f, b1,b2,bs,b3nl, b1v,b2v,bsv,  sigvv1_squre,sigvv2_squre,sigvv3_squre,   Dz = parm  
     k  =PT[0,0:] ; Pl =PT[1,0:]   
     I00=PT[2,0:]  ;I01=PT[3,0:]  ;I02=PT[4,0:]  ;I03=PT[5,0:]  ;I10=PT[6,0:]  ;I11=PT[7,0:]  ;I12=PT[8,0:]  ;I13=PT[9,0:] ;
     I20=PT[10,0:] ;I21=PT[11,0:] ;I22=PT[12,0:] ;I23=PT[13,0:] ;I30=PT[14,0:] ;I31=PT[15,0:] ;I32=PT[16,0:] ;I33=PT[17,0:] ;
     J00=PT[18,0:] ;J01=PT[19,0:];J02=PT[20,0:]; J10=PT[21,0:]; J11=PT[22,0:];  J20=PT[23,0:]; K00=PT[24,0:]; Ks00=PT[25,0:];
     K01=PT[26,0:]; Ks01=PT[27,0:];Ks02=PT[28,0:];K10=PT[29,0:];Ks10=PT[30,0:]; K11=PT[31,0:];
     Ks11=PT[32,0:];K20=PT[33,0:];Ks20=PT[34,0:];K30=PT[35,0:];Ks30=PT[36,0:];  sig3_squre=PT[37,0:];#Intg_norm=PT[38,0:];   
-    sig4_squre=1.0/(24.0*np.pi*np.pi)*(sigma8rat**2*sp.integrate.simps( (I23+2./3.*I32+I33/5.) /k**2,k))    
+    sig4_squre=1.0/(24.0*np.pi*np.pi)*(Dz**4*sp.integrate.simps( (I23+2./3.*I32+I33/5.) /k**2,k))    
     P_00=np.zeros((len(k),len(MU)));P_01=np.zeros((len(k),len(MU)));P_02=np.zeros((len(k),len(MU)))
     P_03=np.zeros((len(k),len(MU)));P_04=np.zeros((len(k),len(MU)));P_11=np.zeros((len(k),len(MU)))
     P_12=np.zeros((len(k),len(MU)));P_13=np.zeros((len(k),len(MU)));P_22=np.zeros((len(k),len(MU)))
     for ss in range(len(MU)):
         mu=MU[ss]
         if(pstyp=='auto'): 
-            P00=(b1+b1)*sigma8rat**2*(b2*K00+bs*Ks00)+b1*b1*sigma8rat*(Pl+2.*sigma8rat*(I00+3.*k*k*Pl*J00))+1./2.*sigma8rat**2*(b2*b2*K01+bs*bs*Ks01+2.*b2*bs*Ks02+4.*b3nl*sig3_squre*Pl)
-            P01=f*b1*sigma8rat*(Pl+2.*sigma8rat*(I01+b1*I10+3.*k*k*Pl*(J01+b1*J10))-b2*sigma8rat*K11-bs*sigma8rat*Ks11)-f*sigma8rat**2*(b2*K10+bs*Ks10+b3nl*sig3_squre*Pl)
-            P02=f*f*b1*sigma8rat**2*(I02+mu**2*I20+2.*k*k*Pl*(J02+mu**2*J20))-f*f*k*k*sigv1_squre*P00+f*f*sigma8rat**2*(b2*(K20+mu**2*K30)+bs*(Ks20+mu**2*Ks30))
+            P00=(b1+b1)*Dz**4*(b2*K00+bs*Ks00)+b1*b1*Dz**2*(Pl+2.*Dz**2*(I00+3.*k*k*Pl*J00))+1./2.*Dz**4*(b2*b2*K01+bs*bs*Ks01+2.*b2*bs*Ks02+4.*b3nl*sig3_squre*Pl)
+            P01=f*b1*Dz**2*(Pl+2.*Dz**2*(I01+b1*I10+3.*k*k*Pl*(J01+b1*J10))-b2*Dz**2*K11-bs*Dz**2*Ks11)-f*Dz**4*(b2*K10+bs*Ks10+b3nl*sig3_squre*Pl)
+            P02=f*f*b1*Dz**4*(I02+mu**2*I20+2.*k*k*Pl*(J02+mu**2*J20))-f*f*k*k*sigv1_squre*P00+f*f*Dz**4*(b2*(K20+mu**2*K30)+bs*(Ks20+mu**2*Ks30))
             P03=-f*f*k*k*sigv2_squre*P01
-            P04=-1./2.*f*f*f*f*b1*k*k*sigv3_squre*sigma8rat**2*(I02+mu**2*I20+2.*k*k*Pl*(J02+mu**2*J20)) +1./4.*f*f*f*f*b1*b1*k**4*P00*(sigv3_squre**2+sig4_squre) 
-            P11=f*f*sigma8rat*(mu**2*(Pl+sigma8rat*(2.*I11+(b1+b1+b1+b1)*I22+b1*b1*I13+6.*k**2*Pl*(J11+(b1+b1)*J10)))  +b1*b1*sigma8rat*I31)
-            P12=f*f*f*sigma8rat**2*(I12+mu**2*I21-b1*(I03+mu**2*I30)+2.*k**2*Pl*(J02+mu**2*J20))   -f*f*k*k*sigv1_squre* P01+2.*f*f*f*k*k*sigma8rat**2*(I01+I10+3.*k*k*Pl*(J01+J10))   *sigv1_squre 
-            P13=-f*f*k*k*f*f*sigma8rat*(sigv2_squre*mu**2*(Pl+sigma8rat*(2.*I11+(b1+b1+b1+b1)*I22 +6.*k*k*Pl*(J11+(b1+b1)*J10))) +sigv1_squre*b1*b1*sigma8rat*(mu**2*I13+I31) )
-            P22=1./4.*f*f*f*f*sigma8rat**2*(I23+2.*mu**2*I32+mu**4*I33)+f*f*f*f*k**4*sigv1_squre**2 *P00-f*f*k*k*sigv1_squre*(2.*P02-f*f*sigma8rat**2*(b2*(K20+mu**2*K30)+bs*(Ks20+mu**2*Ks30)))          
+            P04=-1./2.*f*f*f*f*b1*k*k*sigv3_squre*Dz**4*(I02+mu**2*I20+2.*k*k*Pl*(J02+mu**2*J20)) +1./4.*f*f*f*f*b1*b1*k**4*P00*(sigv3_squre**2+sig4_squre) 
+            P11=f*f*Dz**2*(mu**2*(Pl+Dz**2*(2.*I11+(b1+b1+b1+b1)*I22+b1*b1*I13+6.*k**2*Pl*(J11+(b1+b1)*J10)))  +b1*b1*Dz**2*I31)
+            P12=f*f*f*Dz**4*(I12+mu**2*I21-b1*(I03+mu**2*I30)+2.*k**2*Pl*(J02+mu**2*J20))   -f*f*k*k*sigv1_squre* P01+2.*f*f*f*k*k*Dz**4*(I01+I10+3.*k*k*Pl*(J01+J10))   *sigv1_squre 
+            P13=-f*f*k*k*f*f*Dz**2*(sigv2_squre*mu**2*(Pl+Dz**2*(2.*I11+(b1+b1+b1+b1)*I22 +6.*k*k*Pl*(J11+(b1+b1)*J10))) +sigv1_squre*b1*b1*Dz**2*(mu**2*I13+I31) )
+            P22=1./4.*f*f*f*f*Dz**4*(I23+2.*mu**2*I32+mu**4*I33)+f*f*f*f*k**4*sigv1_squre**2 *P00-f*f*k*k*sigv1_squre*(2.*P02-f*f*Dz**4*(b2*(K20+mu**2*K30)+bs*(Ks20+mu**2*Ks30)))          
         if(pstyp=='crs'):
-            P00=b1*b1v*Pl*sigma8rat+b1*sigma8rat**2*(b2v*K00+bsv*Ks00+2.*b1v*(I00+3.*J00*k*k*Pl)) +1./2.*sigma8rat**2*(b2*b2v*K01+2.*b1v*(b2*K00+bs*Ks00)+bs*bsv*Ks01+b2v*bs*Ks02+b2*bsv*Ks02+4.*b3nl*Pl*sig3_squre)
-            P01=f*sigma8rat*(b1*(Pl+2.*(I01+b1v*I10+3.*(J01+b1v*J10)*k*k*Pl)*sigma8rat) -sigma8rat*(b2*(K10+b1v*K11)+bs*Ks10+b1v*bs*Ks11+b3nl*Pl*sig3_squre))
-            P11=f*f*sigma8rat*(Pl*mu*mu+sigma8rat*(b1*b1v*I31+(2.*I11+b1*b1v*I13+2.*b1*I22+2.*b1v*I22+6.*((b1+b1v)*J10+J11)*k*k*Pl)*mu*mu))
-            P02=f*f*b1*sigma8rat**2*(I02+mu**2*I20+2.*k*k*Pl*(J02+mu**2*J20))-f*f*k*k*sigvv1_squre*P00+f*f*sigma8rat**2*(b2*(K20+mu**2*K30)+bs*(Ks20+mu**2*Ks30))
+            P00=b1*b1v*Pl*Dz**2+b1*Dz**4*(b2v*K00+bsv*Ks00+2.*b1v*(I00+3.*J00*k*k*Pl)) +1./2.*Dz**4*(b2*b2v*K01+2.*b1v*(b2*K00+bs*Ks00)+bs*bsv*Ks01+b2v*bs*Ks02+b2*bsv*Ks02+4.*b3nl*Pl*sig3_squre)
+            P01=f*Dz**2*(b1*(Pl+2.*(I01+b1v*I10+3.*(J01+b1v*J10)*k*k*Pl)*Dz**2) -Dz**2*(b2*(K10+b1v*K11)+bs*Ks10+b1v*bs*Ks11+b3nl*Pl*sig3_squre))
+            P11=f*f*Dz**2*(Pl*mu*mu+Dz**2*(b1*b1v*I31+(2.*I11+b1*b1v*I13+2.*b1*I22+2.*b1v*I22+6.*((b1+b1v)*J10+J11)*k*k*Pl)*mu*mu))
+            P02=f*f*b1*Dz**4*(I02+mu**2*I20+2.*k*k*Pl*(J02+mu**2*J20))-f*f*k*k*sigvv1_squre*P00+f*f*Dz**4*(b2*(K20+mu**2*K30)+bs*(Ks20+mu**2*Ks30))
             P03=-f*f*k*k*sigvv2_squre*P01
-            P04=-1./2.*f*f*f*f*b1*k*k*sigvv3_squre*sigma8rat**2*(I02+mu**2*I20+2.*k*k*Pl*(J02+mu**2*J20)) +1./4.*f*f*f*f*b1*b1v*k**4*P00*(sigvv3_squre**2+sig4_squre) 
-            P12=f*f*f*sigma8rat**2*(I12+mu**2*I21-b1*(I03+mu**2*I30)+2.*k**2*Pl*(J02+mu**2*J20))   -f*f*k*k*sigvv1_squre* P01+2.*f*f*f*k*k*sigma8rat**2*(I01+I10+3.*k*k*Pl*(J01+J10))   *sigvv1_squre 
-            P13=-f*f*k*k*f*f*sigma8rat*(sigvv2_squre*mu**2*(Pl+sigma8rat*(2.*I11+(b1+b1+b1+b1)*I22 +6.*k*k*Pl*(J11+(b1+b1)*J10))) +sigvv1_squre*b1*b1*sigma8rat*(mu**2*I13+I31) )
-            P22=1./4.*f*f*f*f*sigma8rat**2*(I23+2.*mu**2*I32+mu**4*I33)+f*f*f*f*k**4*sigvv1_squre**2 *P00-f*f*k*k*sigvv1_squre*(2.*P02-f*f*sigma8rat**2*(b2*(K20+mu**2*K30)+bs*(Ks20+mu**2*Ks30)))          
+            P04=-1./2.*f*f*f*f*b1*k*k*sigvv3_squre*Dz**4*(I02+mu**2*I20+2.*k*k*Pl*(J02+mu**2*J20)) +1./4.*f*f*f*f*b1*b1v*k**4*P00*(sigvv3_squre**2+sig4_squre) 
+            P12=f*f*f*Dz**4*(I12+mu**2*I21-b1*(I03+mu**2*I30)+2.*k**2*Pl*(J02+mu**2*J20))   -f*f*k*k*sigvv1_squre* P01+2.*f*f*f*k*k*Dz**4*(I01+I10+3.*k*k*Pl*(J01+J10))   *sigvv1_squre 
+            P13=-f*f*k*k*f*f*Dz**2*(sigvv2_squre*mu**2*(Pl+Dz**2*(2.*I11+(b1+b1+b1+b1)*I22 +6.*k*k*Pl*(J11+(b1+b1)*J10))) +sigvv1_squre*b1*b1*Dz**2*(mu**2*I13+I31) )
+            P22=1./4.*f*f*f*f*Dz**4*(I23+2.*mu**2*I32+mu**4*I33)+f*f*f*f*k**4*sigvv1_squre**2 *P00-f*f*k*k*sigvv1_squre*(2.*P02-f*f*Dz**4*(b2*(K20+mu**2*K30)+bs*(Ks20+mu**2*Ks30)))          
         P_00[:,ss]=P00;   P_01[:,ss]=P01;   P_02[:,ss]=P02
         P_03[:,ss]=P03;   P_04[:,ss]=P04;   P_11[:,ss]=P11
         P_12[:,ss]=P12;   P_13[:,ss]=P13;  P_22[:,ss]=P22 
     return   P_00,P_01,P_02,P_03,P_04,P_11,P_12,P_13,P_22  
 
 # 2. calculate model power spectrum:-------------------------------------------
-def Pkmod_Fun(params,sigma8_fid,PT,ps_type, Growthz, do_Multi=True ):  
+def Pkmod_Fun(params,sigma8_fid,PT,ps_type, az,Hz,Dz, do_Multi=True ):  
     fsigma8,  b1sigma8,b2sigma8,bssigma8,b3nlsigma8,  b1vsigma8,b2vsigma8,bsvsigma8,b3nlvsigma8,    sigmav1_squre,sigmav2_squre,sigmav3_squre,    sigmavv1_squre,sigmavv2_squre,sigmavv3_squre  = params   
     sigmav1_squre ,sigmav2_squre ,sigmav3_squre  = np.abs(sigmav1_squre) ,np.abs(sigmav2_squre) ,np.abs(sigmav3_squre)   
     sigmavv1_squre,sigmavv2_squre,sigmavv3_squre = np.abs(sigmavv1_squre),np.abs(sigmavv2_squre),np.abs(sigmavv3_squre )  
     # normalize parms: 
-    f = fsigma8/sigma8_fid
-    sigma8rat = Growthz**2        
+    f = fsigma8/sigma8_fid     
     # density field:  
     b1        = b1sigma8/sigma8_fid 
     b2        = b2sigma8/sigma8_fid
@@ -452,7 +457,7 @@ def Pkmod_Fun(params,sigma8_fid,PT,ps_type, Growthz, do_Multi=True ):
     P_model=[];PSTYP=[];PSRSD=[] 
     mu = np.linspace(0.0, 1.0, 300)    
     if ('den' in ps_type):
-        P_00,P_01,P_02,P_03,P_04,P_11,P_12,P_13,P_22 =PijFun( [f, b1,b2,bs,b3nl, sigmav1_squre,sigmav2_squre,sigmav3_squre,sigma8rat ],PT,mu, 'auto')
+        P_00,P_01,P_02,P_03,P_04,P_11,P_12,P_13,P_22 =PijFun( [f, b1,b2,bs,b3nl, sigmav1_squre,sigmav2_squre,sigmav3_squre,Dz ],PT,mu, 'auto')
         P_den  = P_00 + mu**2*(2.0*P_01 + P_02 + P_11) + mu**4*(P_03 + P_04 + P_12 + P_13 + 1.0/4.0*P_22)
         P_0den = (2.0*0 + 1.0)  * sp.integrate.simps(P_den,mu,axis=1)
         P_2den = (2.0*2 + 1.0)  * sp.integrate.simps( ((3.*(mu**2)-1.)/2.)*P_den,mu,axis=1)
@@ -460,16 +465,16 @@ def Pkmod_Fun(params,sigma8_fid,PT,ps_type, Growthz, do_Multi=True ):
         P_model.append([P_0den,P_2den,P_4den]) ; PSTYP.append( 'den' ); 
         if((ps_type=='den')and(not do_Multi)):PSRSD=P_den   
     if ('mom' in ps_type):
-        P_00,P_01,P_02,P_03,P_04,P_11,P_12,P_13,P_22 =PijFun( [f, b1v,b2v,bsv,b3nlv, sigmavv1_squre,sigmavv2_squre,sigmavv3_squre,sigma8rat ],PT,mu, 'auto')
-        P_mom  = ((1.0e4)/(1.0**2)/(PT[0,0:]*PT[0,0:])*(P_11 + mu**2*(2.0*P_12 + 3.0*P_13 + P_22)).T).T
+        P_00,P_01,P_02,P_03,P_04,P_11,P_12,P_13,P_22 =PijFun( [f, b1v,b2v,bsv,b3nlv, sigmavv1_squre,sigmavv2_squre,sigmavv3_squre,Dz ],PT,mu, 'auto')
+        P_mom  = ((az*Hz)**2/(PT[0,0:]*PT[0,0:])*(P_11 + mu**2*(2.0*P_12 + 3.0*P_13 + P_22)).T).T
         P_0mom = (2.0*0 + 1.0)  * sp.integrate.simps(P_mom,mu,axis=1)
         P_2mom = (2.0*2 + 1.0)  * sp.integrate.simps( ((3.*(mu**2)-1.)/2.)*P_mom,mu,axis=1) 
         P_4mom = (2.0*4 + 1.0)  * sp.integrate.simps( ((35.*(mu**4)-30.*(mu**2)+3.)/8. )*P_mom,mu,axis=1)  
         P_model.append([P_0mom,P_2mom,P_4mom])  ;  PSTYP.append( 'mom' ); 
         if((ps_type=='mom')and(not do_Multi)):PSRSD=P_mom  
     if ('crs' in ps_type):
-        P_00,P_01,P_02,P_03,P_04,P_11,P_12,P_13,P_22 =PijFun( [f, b1,b2,bs,b3nlv, b1v,b2v,bsv,  sigmavv1_squre,sigmavv2_squre,sigmavv3_squre, sigma8rat],PT,mu, 'crs')
-        P_crs  = (1.0e2/PT[0,0:]*((mu*(P_01 + P_02 + P_11 + mu**2*(3.0/2.0*P_03 + 2.0*P_04 + 2.0*P_12 + 3.0*P_13  + 1.0/2.0*P_22 ))).T)).T
+        P_00,P_01,P_02,P_03,P_04,P_11,P_12,P_13,P_22 =PijFun( [f, b1,b2,bs,b3nlv, b1v,b2v,bsv,  sigmav1_squre,sigmav2_squre,sigmav3_squre, Dz],PT,mu, 'crs')
+        P_crs  = ((az*Hz)/PT[0,0:]*((mu*(P_01 + P_02 + P_11 + mu**2*(3.0/2.0*P_03 + 2.0*P_04 + 3.0/2.0*P_12 + 2.0*P_13  + 1.0/2.0*P_22 ))).T)).T
         P_1crs = (2.0*1 + 1.0)  * sp.integrate.simps(mu*P_crs,mu,axis=1)
         P_3crs = (2.0*3 + 1.0)  * sp.integrate.simps( (1./2.*(5.*mu**3-3.*mu) )*P_crs,mu,axis=1)   
         P_model.append([P_1crs,P_3crs])  ; PSTYP.append( 'crs' ); 
@@ -478,7 +483,7 @@ def Pkmod_Fun(params,sigma8_fid,PT,ps_type, Growthz, do_Multi=True ):
         return P_model,PSTYP
     else:
         return PT[0,0:],mu, PSRSD 
-def Pkmod_Kaiser_Fun(parm,Sig8_fid,k,PL,ps_type, a, do_Multi=True ):        
+def Pkmod_Kaiser_Fun(parm,Sig8_fid,k,PL,ps_type, az,Hz, do_Multi=True ):        
     fsigma8,bsigma8,sigvd,sigvv=parm
     # model PS:
     P_model=[];PSTYP=[];PSRSD=[] 
@@ -497,7 +502,7 @@ def Pkmod_Kaiser_Fun(parm,Sig8_fid,k,PL,ps_type, a, do_Multi=True ):
         P_mom=np.zeros((len(k),len(mu)))  
         for ss in range(len(mu)):
             u=mu[ss]  
-            P_mom[:,ss]=( a * 100. *fsigma8/Sig8_fid * u / k )        *( a * 100. *fsigma8/Sig8_fid * u / k )         * np.sinc(k*sigvv)                 *np.sinc(k*sigvv)                  * PL
+            P_mom[:,ss]=( az * Hz *fsigma8/Sig8_fid * u / k )        *( az * Hz *fsigma8/Sig8_fid * u / k )         * np.sinc(k*sigvv)                 *np.sinc(k*sigvv)                  * PL
         P_0mom = (2.0*0 + 1.0)  * sp.integrate.simps(P_mom,mu,axis=1)
         P_2mom = (2.0*2 + 1.0)  * sp.integrate.simps( ((3.*(mu**2)-1.)/2.)*P_mom,mu,axis=1) 
         P_4mom = (2.0*4 + 1.0)  * sp.integrate.simps( ((35.*(mu**4)-30.*(mu**2)+3.)/8. )*P_mom,mu,axis=1)  
@@ -507,7 +512,7 @@ def Pkmod_Kaiser_Fun(parm,Sig8_fid,k,PL,ps_type, a, do_Multi=True ):
         P_crs=np.zeros((len(k),len(mu)))  
         for ss in range(len(mu)):
             u=mu[ss]  
-            P_crs[:,ss]=( bsigma8/Sig8_fid + fsigma8/Sig8_fid * u**2 )*( a * 100. *fsigma8/Sig8_fid * u / k )         * (1.+0.5*(k*u*sigvd)**2)**(-1./2.)*np.sinc(k*sigvv)                  * PL    
+            P_crs[:,ss]=( bsigma8/Sig8_fid + fsigma8/Sig8_fid * u**2 )*( az * Hz *fsigma8/Sig8_fid * u / k )         * (1.+0.5*(k*u*sigvd)**2)**(-1./2.)*np.sinc(k*sigvv)                  * PL    
         P_1crs = (2.0*1 + 1.0)  * sp.integrate.simps(mu*P_crs,mu,axis=1)
         P_3crs = (2.0*3 + 1.0)  * sp.integrate.simps( (1./2.*(5.*mu**3-3.*mu) )*P_crs,mu,axis=1)   
         P_model.append([P_1crs,P_3crs])  ; PSTYP.append( 'crs' ); 
@@ -518,15 +523,15 @@ def Pkmod_Kaiser_Fun(parm,Sig8_fid,k,PL,ps_type, a, do_Multi=True ):
         return k,mu,PSRSD  
     
 # 3. calculate window function convolved PS:-----------------------------------
-def PkmodMulti_Fun(params,OnlyL0,Sig8_fid, k_obs, kmod_conv,WF_Kobs_Kmod,WF_rand,PT,ps_type, Growthz, WFCon_type,model_typt='nonlin'):
+def PkmodMulti_Fun(params,OnlyL0,Sig8_fid, k_obs, kmod_conv,WF_Kobs_Kmod,WF_rand,PT,ps_type, az,Hz,Dz, WFCon_type,model_typt='nonlin'):
     if((WFCon_type!='Ross')and(WFCon_type!='Blake')and(WFCon_type!='Beutler')):
         kobs = k_obs+0.-0.
         k_obs   = np.concatenate(np.array([list(kobs),list(kobs),list(kobs)]))
         kmod_conv  = np.array([list(kobs),list(kobs),list(kobs)])
         WF_Kobs_Kmod  = [np.eye(3*len(kobs)),np.eye(3*len(kobs)),np.eye(2*len(kobs))] 
         WFCon_type ='Blake'
-    if(model_typt=='lin'):Pk_mods , psty= Pkmod_Kaiser_Fun(params,Sig8_fid,PT[0,0:],PT[1,0:],ps_type, Growthz )    
-    else:                 Pk_mods , psty= Pkmod_Fun(       params,Sig8_fid,PT,               ps_type, Growthz )
+    if(model_typt=='lin'):Pk_mods , psty= Pkmod_Kaiser_Fun(params,Sig8_fid,PT[0,0:],PT[1,0:],ps_type, az,Hz    )    
+    else:                 Pk_mods , psty= Pkmod_Fun(       params,Sig8_fid,PT,               ps_type, az,Hz,Dz )
     Pk_mod   = []   ;  Pk_modunc   = []   ; kmod_uncon=[]
     for i in range(len(Pk_mods)):
         Pk_modss=np.concatenate(Pk_mods[i] )
@@ -761,6 +766,9 @@ def Fsigma8_Fun(gamma,RsFeff,Sig8_fid, OmegaM, OmegaA,  Hub):
     OmegaMz   = Omega_m_z(RsFeff, OmegaM, OmegaA, 0.0, -1.0, 0.0, 0.0)
     fsig8     = OmegaMz**gamma*Sig8_fid*sig8_fac*gamma_fac 
     return fsig8 
+def Dz_Fun(RsFeff, OmegaM, OmegaA, Hub):
+    Dz = GrowthFactorGR(RsFeff, OmegaM, OmegaA, 0.0, Hub, -1.0, 0.0, 0.0)/GrowthFactorGR(0.0, OmegaM, OmegaA, 0.0, Hub, -1.0, 0.0, 0.0)
+    return Dz
 def logd_to_Vp(Logd,Rsf,OmegaM):
     deccel = 3.0*OmegaM/2.0 - 1.0
     Vmod   = Rsf*LightSpeed*(1.0 + 0.5*(1.0 - deccel)*Rsf - (2.0 - deccel - 3.0*deccel*deccel)*Rsf*Rsf/6.0)
@@ -839,13 +847,21 @@ def binpk(pkspec,nx,ny,nz,lx,ly,lz,kmin,kmax,nkbin):
     return pk,nmodes 
 
 # 3. blake convolution matrix:-------------------------------------------------
-def ConvMat_Blake(kmin,kmax,nkbin,kmaxc,nkbinc,nx,ny,nz,lx,ly,lz,w,Win,w2,Win2,PStype):
+def ConvMat_Blake(kmin,kmax,nkbin,kmaxc,nkbinc,nx,ny,nz,lx,ly,lz,w,Win,w2,Win2,PStype,kmod_scale='log'):
     # Initializations
     if(PStype!='crs'):nlconv = 3 # Number of multipoles to include in convolution
     if(PStype=='crs'):nlconv = 2
-    dkc = (kmaxc-kmin)/nkbinc
-    k1 = np.linspace(kmin,kmaxc-dkc,nkbinc)
-    k2 = np.linspace(kmin+dkc,kmaxc,nkbinc)
+    if(kmod_scale=='lin'):
+        dkc = (kmaxc-kmin)/nkbinc
+        k1 = np.linspace(kmin,kmaxc-dkc,nkbinc)
+        k2 = np.linspace(kmin+dkc,kmaxc,nkbinc)
+    #if(kmod_scale=='geo'):    
+    #    spc= np.geomspace(1e-8,kmaxc,nkbinc+1);
+    #    k1 = spc[:-1]; k2=spc[1:] ; k1[0]=kmin
+    if(kmod_scale=='log'):
+        spc=(1.111*kmaxc*(np.logspace(0., 1., nkbinc+1 )-1.)/10.)  
+        spc[-1]=kmaxc; spc[0]=0. ;spc=np.sort(kmaxc-spc)
+        k1=spc[:-1]; k2=spc[1:]     
     convmat = np.zeros((nlconv*(nkbin-1),nlconv*nkbinc))
     # Convolve series of unit vectors
     iconv = -1
