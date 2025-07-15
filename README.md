@@ -7,7 +7,28 @@ Paper 1: Howlett 2019: https://ui.adsabs.harvard.edu/abs/2019MNRAS.487.5209H/abs
 
 Paper 2: Qin et al. 2019b: https://ui.adsabs.harvard.edu/abs/2019MNRAS.487.5235Q/abstract
 
-Paper 3: Qin et al. 2024: https://ui.adsabs.harvard.edu/abs/2025ApJ...978....7Q/abstract
+Paper 3: Qin et al. 2025: https://ui.adsabs.harvard.edu/abs/2025ApJ...978....7Q/abstract
+
+Paper 5: Qin et al. 2025b
 
 Window Function Convolution: Blake et al. 2018: https://ui.adsabs.harvard.edu/abs/2018MNRAS.479.5168B/abstract
+
+\
+\
+1: CosmPSPy: 
+
+To install the PYTHON package 'CosmPSPy', the users can simply download the 'PSestFun.py' and 'PSmodFun.py' to their laptop, then importing them using:
+
+from PSestFun import *
+
+from PSmodFun import *
+
+So easy !!! The "PSestFun.py" is used to measure the power spectrum, while the "PSmodFun.py" is used to model the power spectrum. The code can be downloaded from the GitHub link: https://github.com/FeiQin-cosmologist/Galaxy_Power_Spectrum . The following Python packages are required to be installed for our code:
+
+1: numpy
+
+2: scipy 
+
+\
+\
 
