@@ -16,6 +16,7 @@ Window Function Convolution: Blake et al. 2018: https://ui.adsabs.harvard.edu/ab
 \
 \
 #################################################
+
 1: CosmPSPy: 
 
 The PYTHON code for power spectrum. The example for how to use the code can be found in 
@@ -54,19 +55,21 @@ You may also need PYPOWER (not compulsory) for window function convolution (only
 \
 
 #################################################
+
 CosmPSFt: 
 
 The Fortran code for power spectrum. 
 The following Python packages are required to be installed for our code:
 
-1: numpy
+1: fftw-3.3.10 : https://www.fftw.org/download.html
 
-2: scipy 
+2: gsl-2.8 : https://formulae.brew.sh/formula/gsl 
 
 \
 \
 
 #################################################
+
 Math: 
 
 The code used to derived the equations for power spectrum, including model power spectrum, power spectrum estimator, window function.
@@ -75,7 +78,8 @@ The code used to derived the equations for power spectrum, including model power
 \
 
 #################################################
-Math: 
 
-The code used to derived the equations for power spectrum, including model power spectrum, power spectrum estimator, window function.
+FitExamp: 
+
+We measure the power spectrum of 600 mocks of 6dFGS and 6dFGSv surveys. We fit the growth rate fsigma8 by comparing the model power spectrum to measured power spectrum. We use density power spectrum, momentum power spectrum and cross-power spectrum. 
 
