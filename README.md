@@ -17,7 +17,11 @@ Window Function Convolution: Blake et al. 2018: https://ui.adsabs.harvard.edu/ab
 \
 1: CosmPSPy: 
 
-To install the PYTHON package 'CosmPSPy', the users can simply download the 'PSestFun.py' and 'PSmodFun.py' to their laptop, then importing them using:
+To install the PYTHON package 'CosmPSPy', the users can simply download the 'PSestFun.py' and 'PSmodFun.py' from 
+
+https://github.com/FeiQin-cosmologist/Galaxy_Power_Spectrum/tree/main/CosmPSPy/Code 
+
+to their laptop, then importing them using:
 
 from PSestFun import *
 
