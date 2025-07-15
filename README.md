@@ -15,9 +15,10 @@ Window Function Convolution: Blake et al. 2018: https://ui.adsabs.harvard.edu/ab
 
 \
 \
+#################################################
 1: CosmPSPy: 
 
-The example for how to use the code can be found in 
+The PYTHON code for power spectrum. The example for how to use the code can be found in 
 
 https://github.com/FeiQin-cosmologist/Galaxy_Power_Spectrum/blob/main/CosmPSPy/Code/Examp_PS.ipynb
 
@@ -41,10 +42,40 @@ The following Python packages are required to be installed for our code:
 
 2: scipy 
 
-You may also need CAMB for model power spectrum
+You may also need CAMB (not compulsory) for model power spectrum
 
 3: CAMB : https://pypi.org/project/camb/
 
+You may also need PYPOWER (not compulsory) for window function convolution (only for the Beutler Method)
+
+4: PYPOWER : https://pypower.readthedocs.io/en/latest/
+
 \
 \
+
+#################################################
+CosmPSFt: 
+
+The Fortran code for power spectrum. 
+The following Python packages are required to be installed for our code:
+
+1: numpy
+
+2: scipy 
+
+\
+\
+
+#################################################
+Math: 
+
+The code used to derived the equations for power spectrum, including model power spectrum, power spectrum estimator, window function.
+
+\
+\
+
+#################################################
+Math: 
+
+The code used to derived the equations for power spectrum, including model power spectrum, power spectrum estimator, window function.
 
