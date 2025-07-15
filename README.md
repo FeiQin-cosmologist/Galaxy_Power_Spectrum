@@ -17,6 +17,10 @@ Window Function Convolution: Blake et al. 2018: https://ui.adsabs.harvard.edu/ab
 \
 1: CosmPSPy: 
 
+The example for how to use the code can be found in 
+
+
+
 To install the PYTHON package 'CosmPSPy', the users can simply download the 'PSestFun.py' and 'PSmodFun.py' from 
 
 https://github.com/FeiQin-cosmologist/Galaxy_Power_Spectrum/tree/main/CosmPSPy/Code 
@@ -27,7 +31,7 @@ from PSestFun import *
 
 from PSmodFun import *
 
-So easy !!! The "PSestFun.py" is used to measure the power spectrum, while the "PSmodFun.py" is used to model the power spectrum. The code can be downloaded from the GitHub link: https://github.com/FeiQin-cosmologist/Galaxy_Power_Spectrum . The following Python packages are required to be installed for our code:
+So easy !!! The "PSestFun.py" is used to measure the power spectrum, while the "PSmodFun.py" is used to model the power spectrum. The code can be downloaded from the GitHub link: https://github.com/FeiQin-cosmologist/Galaxy_Power_Spectrum/tree/main/CosmPSPy . The following Python packages are required to be installed for our code:
 
 1: numpy
 
