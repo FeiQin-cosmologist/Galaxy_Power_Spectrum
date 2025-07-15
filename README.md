@@ -41,6 +41,10 @@ The following Python packages are required to be installed for our code:
 
 2: scipy 
 
+You may also need CAMB for model power spectrum
+
+3: CAMB : https://pypi.org/project/camb/
+
 \
 \
 
