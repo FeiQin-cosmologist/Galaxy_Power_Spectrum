@@ -19,7 +19,7 @@ Paper 4: Qin et al. 2026:
 \
 #################################################
 
-1: CosmPSPy: 
+CosmPSPy: 
 
 The PYTHON code for power spectrum. The example for how to use the code can be found in 
 
