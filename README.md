@@ -9,9 +9,9 @@ Paper 2: Qin et al. 2019b: https://ui.adsabs.harvard.edu/abs/2019MNRAS.487.5235Q
 
 Paper 3: Qin et al. 2025: https://ui.adsabs.harvard.edu/abs/2025ApJ...978....7Q/abstract
 
-Paper 5: Qin et al. 2025b
+Paper 4: Qin et al. 2026: 
 
-Window Function Convolution: Blake et al. 2018: https://ui.adsabs.harvard.edu/abs/2018MNRAS.479.5168B/abstract
+ 
 
 \
 \
