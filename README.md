@@ -60,7 +60,7 @@ You may also need PYPOWER (not compulsory) for window function convolution (only
 
 CosmPSFt: 
 
-The Fortran code for power spectrum. 
+For the Fortran users, we have the corresponding Fortran code for power spectrum measurements (not for modelling). 
 The following Fortran packages are required to be installed for our code:
 
 1: fftw-3.3.10 : https://www.fftw.org/download.html
