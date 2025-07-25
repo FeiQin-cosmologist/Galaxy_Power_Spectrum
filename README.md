@@ -45,7 +45,7 @@ The following Python packages are required to be installed for our code:
 
 2: scipy 
 
-You may also need CAMB (not compulsory) for the model power spectrum
+You may also need CAMB (not compulsory) for calculating the linear matter power spectrum PL(k). You can use other methods to calculate the linear matter power spectrum.
 
 3: CAMB : https://pypi.org/project/camb/
 
