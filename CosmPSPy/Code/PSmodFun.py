@@ -8,7 +8,7 @@ from scipy.special import gamma
 
  
 
-
+  
 
 
 ###############################################################################   
@@ -505,7 +505,7 @@ def Pkmod_Fun(params,sigma8_fid,PT,ps_type, az,Hz,Dz, do_Multi=True, GaliTrans=F
             P_model.append([P_0den,P_2den,P_4den]) ; PSTYP.append( 'den' ); 
             if((ps_type=='den')and(not do_Multi)):PSRSD=P_den   
         if ('mom' in ps_type):
-            P_mom  = P_mom +  epsilon**2 * P_den + epsilon**2/(2.*np.pi)**3
+            P_mom  = P_mom +  epsilon**2 * P_den 
             P_0mom = (2.0*0 + 1.0)  * sp.integrate.simps(P_mom,mu,axis=1)
             P_2mom = (2.0*2 + 1.0)  * sp.integrate.simps( ((3.*(mu**2)-1.)/2.)*P_mom,mu,axis=1) 
             P_4mom = (2.0*4 + 1.0)  * sp.integrate.simps( ((35.*(mu**4)-30.*(mu**2)+3.)/8. )*P_mom,mu,axis=1)  
@@ -580,7 +580,7 @@ def Pkmod_Kaiser_Fun(parm,Sig8_fid,k,PL,ps_type, az,Hz, do_Multi=True, GaliTrans
             P_model.append([P_0den,P_2den,P_4den]) ; PSTYP.append( 'den' ); 
             if((ps_type=='den')and(not do_Multi)):PSRSD=P_den   
         if ('mom' in ps_type):
-            P_mom  = P_mom +  epsilon**2 * P_den + epsilon**2/(2.*np.pi)**3
+            P_mom  = P_mom +  epsilon**2 * P_den  
             P_0mom = (2.0*0 + 1.0)  * sp.integrate.simps(P_mom,mu,axis=1)
             P_2mom = (2.0*2 + 1.0)  * sp.integrate.simps( ((3.*(mu**2)-1.)/2.)*P_mom,mu,axis=1) 
             P_4mom = (2.0*4 + 1.0)  * sp.integrate.simps( ((35.*(mu**4)-30.*(mu**2)+3.)/8. )*P_mom,mu,axis=1)  
