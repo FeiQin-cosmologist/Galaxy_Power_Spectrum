@@ -25,6 +25,10 @@ The PYTHON code for power spectrum. The example for how to use the code can be f
 
 https://github.com/FeiQin-cosmologist/Galaxy_Power_Spectrum/blob/main/CosmPSPy/Code/Examp_PS.ipynb
 
+or NERSC directory:
+
+/global/cfs/cdirs/desi/science/td/pv/PS/CosmPSPy/Code/Examp_PS.ipynb
+
 To install the PYTHON package 'CosmPSPy', the users can simply download the 'PSestFun.py' and 'PSmodFun.py' from 
 
 https://github.com/FeiQin-cosmologist/Galaxy_Power_Spectrum/tree/main/CosmPSPy/Code 
